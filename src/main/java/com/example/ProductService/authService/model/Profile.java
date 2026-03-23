@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -32,8 +33,26 @@ public class Profile implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column()
+    @Column(nullable = false)
     private String role = "02";
+
+    @Column(nullable = false)
+    private String citizenship;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
+    private String contactNumber;
+
+    @Column(nullable = false)
+    private String identificationNumber;
+
+    @Column(nullable = false)
+    private String customerType; // map it to the customer_types db
+
+    @Column(nullable = false)
+    private Date dod;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

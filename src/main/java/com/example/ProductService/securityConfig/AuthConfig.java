@@ -1,4 +1,4 @@
-package com.example.ProductService.authHelpers.security;
+package com.example.ProductService.securityConfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

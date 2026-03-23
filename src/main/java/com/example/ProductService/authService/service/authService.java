@@ -1,6 +1,6 @@
 package com.example.ProductService.authService.service;
 
-import com.example.ProductService.authHelpers.Jwt.JwtService;
+import com.example.ProductService.securityConfig.JwtService;
 import com.example.ProductService.authService.model.LoginRequest;
 import com.example.ProductService.authService.model.AuthResponse;
 import com.example.ProductService.authService.model.Profile;
@@ -40,8 +40,16 @@ public class authService implements UserDetailsService {
                 .email(request.getEmail())
                 .name(request.getName())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .citizenship(request.getCitizenship())
+                .contactNumber(request.getContactNumber())
+                .identificationNumber(request.getIdentificationNumber())
+                .address(request.getAddress())
+                .customerType(request.getCustomerType())
+                .dod(request.getDod())
                 .role("02")
                 .build();
+
+        System.out.println(profile);
 
         authRepository.save(profile);
 

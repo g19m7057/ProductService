@@ -1,10 +1,7 @@
-package com.example.ProductService.authHelpers.security;
+package com.example.ProductService.securityConfig;
 
-import com.example.ProductService.authHelpers.Jwt.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,8 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtAuthFilter;
-    private final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-
     private static final String[] PUBLIC_PATHS = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -40,7 +35,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("01")
                         .anyRequest().authenticated()
                 )
 

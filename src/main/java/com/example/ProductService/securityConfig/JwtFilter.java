@@ -1,4 +1,4 @@
-package com.example.ProductService.authHelpers.Jwt;
+package com.example.ProductService.securityConfig;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,7 +24,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     private static final List<String> SKIP_PATHS = List.of(
-            "/auth",
+            "/auth/register",
+            "/auth/login",
             "/products"
     );
 
@@ -53,6 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (jwtService.isTokenValid(token, userDetails)) {
+                logger.info(jwtService.extractUsername(token));
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );
