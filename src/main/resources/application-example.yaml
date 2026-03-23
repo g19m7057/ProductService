@@ -14,7 +14,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-    port: 4000
+  port: 4000
 
 jwt.expiration: 3600000
-jwt.secret: "YXNkZmFzZGZhc2RmYXNkZmFzZGZhc2RmYXNkZmFzZGZhc2Rm"
+jwt.secret: ""
