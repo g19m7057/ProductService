@@ -1,4 +1,4 @@
-package com.example.ProductService.securityConfig;
+package com.example.ProductService.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

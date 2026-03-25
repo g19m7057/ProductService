@@ -1,4 +1,4 @@
-package com.example.ProductService.securityConfig;
+package com.example.ProductService.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

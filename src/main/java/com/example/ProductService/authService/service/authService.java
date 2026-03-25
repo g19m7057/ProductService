@@ -1,6 +1,6 @@
 package com.example.ProductService.authService.service;
 
-import com.example.ProductService.securityConfig.JwtService;
+import com.example.ProductService.security.JwtService;
 import com.example.ProductService.authService.model.LoginRequest;
 import com.example.ProductService.authService.model.AuthResponse;
 import com.example.ProductService.authService.model.Profile;
@@ -19,7 +19,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class authService implements UserDetailsService {
