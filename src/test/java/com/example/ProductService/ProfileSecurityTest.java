@@ -22,15 +22,15 @@ public class ProfileSecurityTest {
     @Test
     void registerShouldBePublic() throws Exception {
         String email = "test-" + System.currentTimeMillis() + "@example.com";
-        mockMvc.perform(post("/profile/register")
+        mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\": \"" + email + "\", \"password\": \"password\", \"name\": \"Test User\", \"role\": \"USER\"}"))
+                .content("{\"email\": \"" + email + "\", \"password\": \"password\", \"name\": \"Test User\", \"dob\": \"02/02/1991\", \"citizenship\": \"SA\", \"contactNumber\": \"123\", \"identificationNumber\": \"456\", \"address\": \"Addr\", \"customerType\": \"01\"}"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getProfilesShouldBePublic() throws Exception {
-        mockMvc.perform(get("/profile"))
+        mockMvc.perform(get("/auth"))
                 .andExpect(status().isOk());
     }
 

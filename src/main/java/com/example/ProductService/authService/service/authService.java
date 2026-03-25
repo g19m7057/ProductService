@@ -14,7 +14,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class authService implements UserDetailsService {
@@ -32,8 +37,18 @@ public class authService implements UserDetailsService {
     }
 
     public AuthResponse createProfile(RegisterRequest request) {
-        if(authRepository.findByEmail(request.getEmail()) != null) {
-            throw new RuntimeException("Invalid email or password");
+        if(authRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        System.out.println(request);
+        
+        Date dob;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            dob = sdf.parse(request.getDob());
+        } catch (ParseException | NullPointerException e) {
+            throw new IllegalArgumentException("Invalid date format. Expected dd/MM/yyyy", e);
         }
 
         Profile profile = Profile.builder()
@@ -45,7 +60,7 @@ public class authService implements UserDetailsService {
                 .identificationNumber(request.getIdentificationNumber())
                 .address(request.getAddress())
                 .customerType(request.getCustomerType())
-                .dod(request.getDod())
+                .dob(dob)
                 .role("02")
                 .build();
 
@@ -64,14 +79,11 @@ public class authService implements UserDetailsService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        Profile profile = authRepository.findByEmail(request.getEmail());
-
-        if(profile == null) {
-            throw new RuntimeException("Invalid email or password");
-        }
+        Profile profile = authRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid login details"));
 
         if(!passwordEncoder.matches(request.getPassword(), profile.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new RuntimeException("Invalid login details");
         }
 
         String token = jwtService.generateToken(profile);
@@ -80,7 +92,7 @@ public class authService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return authRepository.findByEmail(username);
-//                .orElseThrow(() => new UsernameNotFoundException("User not found"));
+        return authRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

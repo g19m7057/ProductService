@@ -11,5 +11,5 @@ create table if not exists profiles.profiles (
     citizenship varchar(255) not null,
     address varchar(255) not null,
     contact_number varchar(255) not null,
-    dod date not null
+    dob date not null
 );

@@ -52,7 +52,7 @@ public class Profile implements UserDetails {
     private String customerType; // map it to the customer_types db
 
     @Column(nullable = false)
-    private Date dod;
+    private Date dob;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
