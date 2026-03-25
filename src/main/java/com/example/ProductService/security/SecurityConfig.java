@@ -1,5 +1,6 @@
 package com.example.ProductService.security;
 
+import com.example.ProductService.common.filter.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.HeaderWriterFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -21,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtAuthFilter;
+    private final CorrelationIdFilter correlationIdFilter;
     private static final String[] PUBLIC_PATHS = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -54,6 +57,7 @@ public class SecurityConfig {
                         })
                 )
 
+                .addFilterBefore(correlationIdFilter, HeaderWriterFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
