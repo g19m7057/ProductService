@@ -1,6 +1,6 @@
-package com.example.ProductService.authService.repository;
+package com.example.ProductService.auth.repository;
 
-import com.example.ProductService.authService.model.Profile;
+import com.example.ProductService.auth.model.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

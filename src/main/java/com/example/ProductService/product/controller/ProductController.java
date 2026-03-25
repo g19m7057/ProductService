@@ -1,8 +1,8 @@
-package com.example.ProductService.productService.controller;
+package com.example.ProductService.product.controller;
 
-import com.example.ProductService.productService.model.Product;
-import com.example.ProductService.productService.model.ProductSummary;
-import com.example.ProductService.productService.service.ProductService;
+import com.example.ProductService.product.model.Product;
+import com.example.ProductService.product.model.ProductSummary;
+import com.example.ProductService.product.service.ProductService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
-package com.example.ProductService.productService.repository;
+package com.example.ProductService.product.repository;
 
-import com.example.ProductService.productService.model.Product;
-import com.example.ProductService.productService.model.ProductSummary;
+import com.example.ProductService.product.model.Product;
+import com.example.ProductService.product.model.ProductSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

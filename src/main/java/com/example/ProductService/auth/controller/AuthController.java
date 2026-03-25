@@ -1,10 +1,10 @@
-package com.example.ProductService.authService.controller;
+package com.example.ProductService.auth.controller;
 
-import com.example.ProductService.authService.model.LoginRequest;
-import com.example.ProductService.authService.model.AuthResponse;
-import com.example.ProductService.authService.model.Profile;
-import com.example.ProductService.authService.model.RegisterRequest;
-import com.example.ProductService.authService.service.authService;
+import com.example.ProductService.auth.model.LoginRequest;
+import com.example.ProductService.auth.model.AuthResponse;
+import com.example.ProductService.auth.model.Profile;
+import com.example.ProductService.auth.model.RegisterRequest;
+import com.example.ProductService.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +16,9 @@ import java.util.List;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final authService authService;
+    private final AuthService authService;
     @Autowired
-    public AuthController(authService authService) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
 

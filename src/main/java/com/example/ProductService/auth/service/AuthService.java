@@ -1,11 +1,11 @@
-package com.example.ProductService.authService.service;
+package com.example.ProductService.auth.service;
 
 import com.example.ProductService.security.JwtService;
-import com.example.ProductService.authService.model.LoginRequest;
-import com.example.ProductService.authService.model.AuthResponse;
-import com.example.ProductService.authService.model.Profile;
-import com.example.ProductService.authService.model.RegisterRequest;
-import com.example.ProductService.authService.repository.AuthRepository;
+import com.example.ProductService.auth.model.LoginRequest;
+import com.example.ProductService.auth.model.AuthResponse;
+import com.example.ProductService.auth.model.Profile;
+import com.example.ProductService.auth.model.RegisterRequest;
+import com.example.ProductService.auth.repository.AuthRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +21,15 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class authService implements UserDetailsService {
+public class AuthService implements UserDetailsService {
 
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final Logger logger = LoggerFactory.getLogger(authService.class);
+    private final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @Autowired
-    public authService(AuthRepository authRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(AuthRepository authRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.authRepository = authRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -39,8 +39,6 @@ public class authService implements UserDetailsService {
         if(authRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Invalid email or password");
         }
-
-        System.out.println(request);
         
         Date dob;
         try {
@@ -86,6 +84,8 @@ public class authService implements UserDetailsService {
         }
 
         String token = jwtService.generateToken(profile);
+        logger.info("Login successful, token created");
+
         return AuthResponse.builder().token(token).build();
     }
 

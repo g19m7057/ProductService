@@ -1,4 +1,4 @@
-package com.example.ProductService.productService.model;
+package com.example.ProductService.product.model;
 
 public interface ProductSummary {
     String getName();
