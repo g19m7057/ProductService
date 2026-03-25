@@ -22,3 +22,13 @@ jwt.secret: "YXNkZmFzZGZhc2RmYXNkZmFzZGZhc2RmYXNkZmFzZGZhc2Rm"
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} [%X{correlationId}] - %msg%n"
+
+rate-limit:
+  auth:
+    capacity: 3
+    refill-amount: 3
+    refill-duration-minutes: 1
+  general:
+    capacity: 20
+    refill-amount: 20
+    refill-duration-minutes: 1

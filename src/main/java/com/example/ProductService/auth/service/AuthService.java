@@ -9,6 +9,7 @@ import com.example.ProductService.auth.repository.AuthRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -80,7 +81,7 @@ public class AuthService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid login details"));
 
         if(!passwordEncoder.matches(request.getPassword(), profile.getPassword())) {
-            throw new RuntimeException("Invalid login details");
+            throw new BadCredentialsException("Invalid login details");
         }
 
         String token = jwtService.generateToken(profile);
