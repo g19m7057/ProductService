@@ -10,19 +10,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 @Service
-public class AuthService implements UserDetailsService {
+public class AuthService implements ReactiveUserDetailsService {
 
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,63 +37,64 @@ public class AuthService implements UserDetailsService {
         this.jwtService = jwtService;
     }
 
-    public AuthResponse createProfile(RegisterRequest request) {
-        if(authRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Invalid email or password");
-        }
-        
-        Date dob;
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            dob = sdf.parse(request.getDob());
-        } catch (ParseException | NullPointerException e) {
-            throw new IllegalArgumentException("Invalid date format. Expected dd/MM/yyyy", e);
-        }
+    public Mono<AuthResponse> createProfile(RegisterRequest request) {
+        return authRepository.findByEmail(request.getEmail())
+                .flatMap(existingProfile -> Mono.<Profile>error(new IllegalArgumentException("Invalid email or password")))
+                .switchIfEmpty(Mono.defer(() -> {
+                    Date dob;
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                        dob = sdf.parse(request.getDob());
+                    } catch (ParseException | NullPointerException e) {
+                        return Mono.error(new IllegalArgumentException("Invalid date format. Expected dd/MM/yyyy", e));
+                    }
 
-        Profile profile = Profile.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .citizenship(request.getCitizenship())
-                .contactNumber(request.getContactNumber())
-                .identificationNumber(request.getIdentificationNumber())
-                .address(request.getAddress())
-                .customerType(request.getCustomerType())
-                .dob(dob)
-                .role("02")
-                .build();
+                    Profile profile = Profile.builder()
+                            .email(request.getEmail())
+                            .name(request.getName())
+                            .password(passwordEncoder.encode(request.getPassword()))
+                            .isSouthAfrican(request.isSouthAfrican())
+                            .contactNumber(request.getContactNumber())
+                            .identificationNumber(request.getIdentificationNumber())
+                            .address(request.getAddress())
+                            .customerType(request.getCustomerType())
+                            .dob(dob)
+                            .role("02")
+                            .build();
 
-        System.out.println(profile);
+                    System.out.println(profile);
 
-        authRepository.save(profile);
-
-        String token = jwtService.generateToken(profile);
-        logger.info("Profile created:{}", profile.getEmail());
-
-        return AuthResponse.builder().token(token).build();
+                    return authRepository.save(profile);
+                }))
+                .map(profile -> {
+                    String token = jwtService.generateToken(profile);
+                    logger.info("Profile created:{}", profile.getEmail());
+                    return AuthResponse.builder().token(token).build();
+                });
     }
 
-    public List<Profile> getProfiles() {
+    public Flux<Profile> getProfiles() {
         return authRepository.findAll();
     }
 
-    public AuthResponse login(LoginRequest request) {
-        Profile profile = authRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid login details"));
+    public Mono<AuthResponse> login(LoginRequest request) {
+        return authRepository.findByEmail(request.getEmail())
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException("Invalid login details")))
+                .flatMap(profile -> {
+                    if (!passwordEncoder.matches(request.getPassword(), profile.getPassword())) {
+                        return Mono.error(new BadCredentialsException("Invalid login details"));
+                    }
 
-        if(!passwordEncoder.matches(request.getPassword(), profile.getPassword())) {
-            throw new BadCredentialsException("Invalid login details");
-        }
+                    String token = jwtService.generateToken(profile);
+                    logger.info("Login successful, token created");
 
-        String token = jwtService.generateToken(profile);
-        logger.info("Login successful, token created");
-
-        return AuthResponse.builder().token(token).build();
+                    return Mono.just(AuthResponse.builder().token(token).build());
+                });
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public Mono<UserDetails> findByUsername(String username) {
         return authRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .cast(UserDetails.class);
     }
 }

@@ -1,10 +1,12 @@
 package com.example.ProductService.auth.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,44 +16,36 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@Entity
 @Builder
-@Table(name = "profiles", schema = "profiles")
+@Table(name = "profiles")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Profile implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
     private String role = "02";
 
-    @Column(nullable = false)
-    private String citizenship;
+    @Column("is_south_african")
+    private Boolean isSouthAfrican;
 
-    @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
+    @Column("contact_number")
     private String contactNumber;
 
-    @Column(nullable = false)
+    @Column("identification_number")
     private String identificationNumber;
 
-    @Column(nullable = false)
-    private String customerType; // map it to the customer_types db
+    @Column("customer_type")
+    private String customerType;
 
-    @Column(nullable = false)
     private Date dob;
 
     @Override

@@ -1,12 +1,11 @@
 package com.example.ProductService.auth.repository;
 
 import com.example.ProductService.auth.model.Profile;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface AuthRepository extends JpaRepository<Profile, Long> {
-    public Optional<Profile> findByEmail(String email);
+public interface AuthRepository extends ReactiveCrudRepository<Profile, Long> {
+    public Mono<Profile> findByEmail(String email);
 }

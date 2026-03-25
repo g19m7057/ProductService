@@ -3,25 +3,26 @@ package com.example.ProductService.common.filter;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class RateLimitingFilter extends OncePerRequestFilter {
+public class RateLimitingFilter implements WebFilter {
 
 
     @Value("${rate-limit.auth.capacity}")
@@ -51,13 +52,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private final Logger logger = LoggerFactory.getLogger(RateLimitingFilter.class);
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        String path = request.getServletPath();
-        String clientIp = getClientIp(request);
-        
+        String path = exchange.getRequest().getPath().value();
+        String clientIp = getClientIp(exchange);
+
         Bucket bucket;
         if (isAuthEndpoint(path)) {
             bucket = authBuckets.computeIfAbsent(clientIp, k -> createAuthBucket());
@@ -65,20 +64,22 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             bucket = generalBuckets.computeIfAbsent(clientIp, k -> createGeneralBucket());
         }
 
-        response.setHeader(RATE_LIMIT_VERSION_HEADER, VERSION);
+        exchange.getResponse().getHeaders().set(RATE_LIMIT_VERSION_HEADER, VERSION);
 
-        if (bucket.tryConsume(1)) {
-            filterChain.doFilter(request, response);
-        } else {
-            logger.warn("Rate limit exceeded - ip={} path={} correlationId={}",
-                    request.getRemoteAddr(),
-                    path,
-                    MDC.get("correlationId")
-            );
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Too many requests\", \"message\": \"Rate limit exceeded\"}");
-        }
+        return Mono.defer(() -> {
+            if (bucket.tryConsume(1)) {
+                return chain.filter(exchange);
+            } else {
+                logger.warn("Rate limit exceeded - path={} correlationId={}",
+                        path,
+                        MDC.get("correlationId")
+                );
+                exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
+                exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                DataBuffer buffer = exchange.getResponse().bufferFactory().wrap("{\"error\": \"Too many requests\", \"message\": \"Rate limit exceeded\"}".getBytes());
+                return exchange.getResponse().writeWith(Mono.just(buffer));
+            }
+        });
     }
 
     private boolean isAuthEndpoint(String path) {
@@ -99,11 +100,12 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                 .build();
     }
 
-    private String getClientIp(HttpServletRequest request) {
-        String xfHeader = request.getHeader("X-Forwarded-For");
+    private String getClientIp(ServerWebExchange exchange) {
+        String xfHeader = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
         if (xfHeader == null) {
-            return request.getRemoteAddr();
+            InetSocketAddress remoteAddress = exchange.getRequest().getRemoteAddress();
+            return remoteAddress != null ? remoteAddress.getAddress().getHostAddress() : "unknown";
         }
-        return xfHeader.split(",")[0];
+        return xfHeader.split(",")[0].trim();
     }
 }

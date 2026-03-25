@@ -5,14 +5,14 @@ import com.example.ProductService.auth.model.AuthResponse;
 import com.example.ProductService.auth.model.Profile;
 import com.example.ProductService.auth.model.RegisterRequest;
 import com.example.ProductService.auth.service.AuthService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/auth")
@@ -27,20 +27,22 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public  ResponseEntity<AuthResponse>  createProfile(@RequestBody RegisterRequest request) {
+    public Mono<ResponseEntity<AuthResponse>> createProfile(@RequestBody RegisterRequest request) {
         logger.info("Creating Profile");
-        return ResponseEntity.ok(authService.createProfile(request));
+        return authService.createProfile(request)
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping
-    public ResponseEntity<List<Profile>> getProfiles() {
+    public Flux<Profile> getProfiles() {
         logger.info("Getting Profiles");
-        return ResponseEntity.ok(authService.getProfiles());
+        return authService.getProfiles();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public Mono<ResponseEntity<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         logger.info("Login Request");
-        return ResponseEntity.ok(authService.login(request));
+        return authService.login(request)
+                .map(ResponseEntity::ok);
     }
 }

@@ -24,7 +24,7 @@ public class ProfileSecurityTest {
         String email = "test-" + System.currentTimeMillis() + "@example.com";
         mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\": \"" + email + "\", \"password\": \"password\", \"name\": \"Test User\", \"dob\": \"02/02/1991\", \"citizenship\": \"SA\", \"contactNumber\": \"123\", \"identificationNumber\": \"456\", \"address\": \"Addr\", \"customerType\": \"01\"}"))
+                .content("{\"email\": \"" + email + "\", \"password\": \"password\", \"name\": \"Test User\", \"dob\": \"02/02/1991\", \"isSouthAfrican\": true, \"contactNumber\": \"123\", \"identificationNumber\": \"456\", \"address\": \"Addr\", \"customerType\": \"01\"}"))
                 .andExpect(status().isOk());
     }
 
