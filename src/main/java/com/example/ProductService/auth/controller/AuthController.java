@@ -2,7 +2,6 @@ package com.example.ProductService.auth.controller;
 
 import com.example.ProductService.auth.model.LoginRequest;
 import com.example.ProductService.auth.model.AuthResponse;
-import com.example.ProductService.auth.model.Profile;
 import com.example.ProductService.auth.model.RegisterRequest;
 import com.example.ProductService.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
