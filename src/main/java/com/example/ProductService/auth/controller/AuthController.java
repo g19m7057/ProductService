@@ -33,12 +33,6 @@ public class AuthController {
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping
-    public Flux<Profile> getProfiles() {
-        logger.info("Getting Profiles");
-        return authService.getProfiles();
-    }
-
     @PostMapping("/login")
     public Mono<ResponseEntity<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         logger.info("Login Request");

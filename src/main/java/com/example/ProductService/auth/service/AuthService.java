@@ -19,6 +19,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class AuthService implements ReactiveUserDetailsService {
@@ -27,6 +29,7 @@ public class AuthService implements ReactiveUserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Autowired
     public AuthService(AuthRepository authRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
@@ -41,8 +44,8 @@ public class AuthService implements ReactiveUserDetailsService {
                 .switchIfEmpty(Mono.defer(() -> {
                     LocalDate dob;
                     try {
-                        dob = LocalDate.parse(request.getDob());
-                    } catch (NullPointerException e) {
+                        dob = LocalDate.parse(request.getDob(), formatter);
+                    } catch (DateTimeParseException | NullPointerException e) {
                         return Mono.error(new IllegalArgumentException("Invalid date format. Expected dd/MM/yyyy", e));
                     }
 
@@ -67,14 +70,18 @@ public class AuthService implements ReactiveUserDetailsService {
                     logger.info("Profile created:{}", profile.getEmail());
                     return AuthResponse.builder().token(token).build();
                 })
-                .doOnError(error -> logger.error(
-                        "Repository failure in findByEmail: {}",
-                        error.getMessage()
-                )).onErrorMap(error -> new RuntimeException("Failed to create profile", error));
-    }
-
-    public Flux<Profile> getProfiles() {
-        return authRepository.findAll();
+                .doOnError(error -> {
+                    if (error instanceof IllegalArgumentException) {
+                        logger.error("Validation error during profile creation: {}", error.getMessage());
+                    } else {
+                        logger.error("Repository failure during profile creation: {}", error.getMessage());
+                    }
+                }).onErrorMap(error -> {
+                    if (error instanceof IllegalArgumentException) {
+                        return error;
+                    }
+                    return new RuntimeException("Failed to create profile", error);
+                });
     }
 
     public Mono<AuthResponse> login(LoginRequest request) {
