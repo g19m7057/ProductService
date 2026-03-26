@@ -11,13 +11,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Data
 @Builder
-@Table(name = "profiles")
+@Table(name = "profiles", schema = "profiles")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Profile implements UserDetails {
@@ -32,8 +32,8 @@ public class Profile implements UserDetails {
 
     private String role = "02";
 
-    @Column("is_south_african")
-    private Boolean isSouthAfrican;
+    @Column("country_code")
+    private String countryCode;
 
     private String address;
 
@@ -44,9 +44,12 @@ public class Profile implements UserDetails {
     private String identificationNumber;
 
     @Column("customer_type")
-    private String customerType;
+    private int customerType;
 
-    private Date dob;
+    @Column("marital_status")
+    private String maritalStatus;
+
+    private LocalDate dob;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

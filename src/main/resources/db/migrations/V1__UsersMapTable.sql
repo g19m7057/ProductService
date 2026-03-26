@@ -8,6 +8,6 @@ create table if not exists profiles.roles (
 
 INSERT INTO  profiles.roles (role, code)
 VALUES
-    ('Admin', 01),
-    ('User', 02),
-    ('Guest', 03);
+    ('Admin', 1),
+    ('Customer', 2),
+    ('Guest', 3);

@@ -16,8 +16,8 @@ public class RegisterRequest {
     @NonNull @Size(min = 8)
     private String password;
 
-    @NonNull
-    private boolean isSouthAfrican;
+    @NonNull @Size(max = 2)
+    private String countryCode;
 
     @NonNull
     private String contactNumber;
@@ -28,7 +28,9 @@ public class RegisterRequest {
     @NonNull
     private String address;
 
-    private String customerType;
+    private String maritalStatus;
+
+    private int customerType;
 
     @NonNull
     private String dob;

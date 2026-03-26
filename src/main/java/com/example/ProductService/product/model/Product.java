@@ -43,6 +43,18 @@ public class Product {
     @Column("is_active")
     private Boolean isActive = true;
 
+    @Column("required_marital_status")
+    private String requiredMaritalStatus;
+
+    @Column("required_country_code")
+    private String requiredCountryCode;
+
+    @Column("required_customer_type")
+    private Integer requiredCustomerType;
+
+    @Column("min_age")
+    private Integer minAge;
+
     @Column("created_at")
     private java.time.LocalDateTime createdAt;
 }
