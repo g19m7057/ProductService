@@ -18,9 +18,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Service
 public class AuthService implements ReactiveUserDetailsService {
@@ -41,11 +39,10 @@ public class AuthService implements ReactiveUserDetailsService {
         return authRepository.findByEmail(request.getEmail())
                 .flatMap(existingProfile -> Mono.<Profile>error(new IllegalArgumentException("Invalid email or password")))
                 .switchIfEmpty(Mono.defer(() -> {
-                    Date dob;
+                    LocalDate dob;
                     try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                        dob = sdf.parse(request.getDob());
-                    } catch (ParseException | NullPointerException e) {
+                        dob = LocalDate.parse(request.getDob());
+                    } catch (NullPointerException e) {
                         return Mono.error(new IllegalArgumentException("Invalid date format. Expected dd/MM/yyyy", e));
                     }
 
@@ -53,16 +50,15 @@ public class AuthService implements ReactiveUserDetailsService {
                             .email(request.getEmail())
                             .name(request.getName())
                             .password(passwordEncoder.encode(request.getPassword()))
-                            .isSouthAfrican(request.isSouthAfrican())
+                            .countryCode(request.getCountryCode())
                             .contactNumber(request.getContactNumber())
                             .identificationNumber(request.getIdentificationNumber())
                             .address(request.getAddress())
+                            .maritalStatus(request.getMaritalStatus())
                             .customerType(request.getCustomerType())
                             .dob(dob)
                             .role("02")
                             .build();
-
-                    System.out.println(profile);
 
                     return authRepository.save(profile);
                 }))
@@ -70,7 +66,11 @@ public class AuthService implements ReactiveUserDetailsService {
                     String token = jwtService.generateToken(profile);
                     logger.info("Profile created:{}", profile.getEmail());
                     return AuthResponse.builder().token(token).build();
-                });
+                })
+                .doOnError(error -> logger.error(
+                        "Repository failure in findByEmail: {}",
+                        error.getMessage()
+                )).onErrorMap(error -> new RuntimeException("Failed to create profile", error));
     }
 
     public Flux<Profile> getProfiles() {
