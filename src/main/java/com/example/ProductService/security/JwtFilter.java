@@ -23,6 +23,7 @@ public class JwtFilter implements WebFilter {
     private static final List<String> SKIP_PATHS = List.of(
             "/auth/register",
             "/auth/login",
+            "/actuator/health",
             "/products"
     );
 
